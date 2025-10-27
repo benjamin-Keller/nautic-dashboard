@@ -38,7 +38,7 @@ function buildDockerFilters(query: string): {
     const isNegation = keyPart.startsWith("!");
     const key = keyPart.replace(/^!/, "").trim();
     if (key === "image")
-        continue;
+      continue;
     const val = value.trim();
 
     const target = isNegation ? exclude : include;
@@ -83,6 +83,23 @@ app.get("/api/containers", async (req, res) => {
   } catch (error) {
     console.error("Error listing containers:", error);
     res.status(500).json({ error: "Failed to list containers" });
+  }
+});
+
+app.post("/api/containers/:id/start", async (req, res, _) => {
+  try {
+    const id = req.params.id;
+    const container = docker.getContainer(id);
+    container.start((err, data) => {
+      console.info(`Starting container - ${id}`);
+      return;
+    });
+
+    res.status(200).send(`Started container - ${id}`);
+
+  } catch (error) {
+    console.error("Error restarting container:", error);
+    res.status(500).json({ error: "Error restarting container" });
   }
 });
 
