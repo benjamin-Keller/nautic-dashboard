@@ -52,12 +52,6 @@ const ContainerItem: React.FC<ContainerRowProps> = ({ container }) => {
         <>
             <ContextMenu.Root>
                 <ContextMenu.Trigger asChild>
-
-                </ContextMenu.Trigger>
-            </ContextMenu.Root>
-
-            <ContextMenu.Root>
-                <ContextMenu.Trigger asChild>
                     <section className="rounded-sm hover:bg-white/50 hover:cursor-pointer flex flex-col justify-center items-center w-30 h-30 text-black relative bg-white/25">
                         <div className={`absolute top-2 right-2 w-2 h-2 rounded-full ${colorClass}`} title={container.State} />
                         <img className="w-15 text-black"
@@ -69,15 +63,17 @@ const ContainerItem: React.FC<ContainerRowProps> = ({ container }) => {
                         <p className="text-pretty max-w-20 break-all hyphens-manual">{container.Names[0].substring(1)}</p>
                     </section>
                 </ContextMenu.Trigger>
+
                 <ContextMenu.Portal>
-                    <ContextMenu.Content className="min-w-[160px] bg-white border rounded-md shadow-lg p-1">
-                        <ContextMenu.Item onClick={() => startContainer({ containerId: container.Id })} className="px-3 py-2 hover:bg-gray-100 cursor-pointer">
+                    <ContextMenu.Content className="min-w-[160px] bg-[#393c3e] text-white shadow-lg/25 drop-shadow-2xl rounded-md p-1">
+
+                        <ContextMenu.Item onClick={() => startContainer({ containerId: container.Id })} className="px-3 py-2 hover:bg-gray-100/25 cursor-pointer">
                             <div>Start Container</div>
                         </ContextMenu.Item>
-                        <ContextMenu.Item onClick={() => stopContainer({ containerId: container.Id })} className="px-3 py-2 hover:bg-gray-100 cursor-pointer">
+                        <ContextMenu.Item onClick={() => stopContainer({ containerId: container.Id })} className="px-3 py-2 hover:bg-gray-100/25 cursor-pointer">
                             <div>Stop Container</div>
                         </ContextMenu.Item>
-
+                        
                     </ContextMenu.Content>
                 </ContextMenu.Portal>
             </ContextMenu.Root>
