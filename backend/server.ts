@@ -90,16 +90,35 @@ app.post("/api/containers/:id/start", async (req, res, _) => {
   try {
     const id = req.params.id;
     const container = docker.getContainer(id);
+    console.info(`Starting container - ${id}`);
     container.start((err, data) => {
-      console.info(`Starting container - ${id}`);
+      console.info(`Started container - ${id}`);
       return;
     });
 
     res.status(200).send(`Started container - ${id}`);
 
   } catch (error) {
-    console.error("Error restarting container:", error);
-    res.status(500).json({ error: "Error restarting container" });
+    console.error("Error starting container:", error);
+    res.status(500).json({ error: "Error starting container" });
+  }
+});
+
+app.post("/api/containers/:id/stop", async (req, res, _) => {
+  try {
+    const id = req.params.id;
+    const container = docker.getContainer(id);
+    console.info(`Stopping container - ${id}`);
+    container.stop((err, data) => {
+      console.info(`Stopped container - ${id}`);
+      return;
+    });
+
+    res.status(200).send(`Stopped container - ${id}`);
+
+  } catch (error) {
+    console.error("Error Stopping container:", error);
+    res.status(500).json({ error: "Error Stopping container" });
   }
 });
 
