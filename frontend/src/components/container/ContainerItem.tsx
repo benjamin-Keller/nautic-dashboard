@@ -1,5 +1,6 @@
 import { ContextMenu } from "radix-ui";
 import type { Container } from "../../types/Container.type";
+import defaultWave from "../../assets/images/default-container.png";
 
 interface ContainerRowProps {
     container: Container;
@@ -59,7 +60,12 @@ const ContainerItem: React.FC<ContainerRowProps> = ({ container }) => {
                 <ContextMenu.Trigger asChild>
                     <section className="rounded-sm hover:bg-white/50 hover:cursor-pointer flex flex-col justify-center items-center w-30 h-30 text-black relative bg-white/25">
                         <div className={`absolute top-2 right-2 w-2 h-2 rounded-full ${colorClass}`} title={container.State} />
-                        <img className="w-15 text-black" src="https://cdn.jsdelivr.net/gh/selfhst/icons/svg/grafana.svg"></img>
+                        <img className="w-15 text-black"
+                            src={`https://cdn.simpleicons.org/${container.Image.split(":")[0]}`}
+                            onError={(e) => {
+                                (e.target as HTMLImageElement).src = defaultWave;
+                            }}
+                            alt={container.Image}></img>
                         <p className="text-pretty max-w-20 break-all hyphens-manual">{container.Names[0].substring(1)}</p>
                     </section>
                 </ContextMenu.Trigger>
