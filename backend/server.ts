@@ -1,17 +1,23 @@
 import express from "express";
 import Docker from "dockerode";
 import cors from "cors";
+import dotenv from "dotenv";
+dotenv.config();
 
 const app = express();
-const docker = new Docker({
-  // Use this for Linux/macOS:
-  // socketPath: "/var/run/docker.sock",
 
-  // Use this for Windows:
-  socketPath: "//./pipe/docker_engine",
+const dockerSocketPath = process.env.DOCKER_SOCKET_PATH;
+console.log("🛳️ Using Docker socket:", dockerSocketPath);
+
+const docker = new Docker({
+  socketPath: dockerSocketPath,
 });
 
-app.use(cors());
+app.use(cors({
+  origin: "*",
+  methods: ["GET", "POST", "PUT", "DELETE", "OPTIONS"],
+  allowedHeaders: ["Content-Type", "Authorization"]
+}));
 
 /**
  * Build Docker filters and negations from a query string.
@@ -122,7 +128,7 @@ app.post("/api/containers/:id/stop", async (req, res, _) => {
   }
 });
 
-const PORT = 4000;
+const PORT = process.env.PORT || 4000;
 app.listen(PORT, () =>
   console.log(`🚀 Backend running at http://localhost:${PORT}`)
 );

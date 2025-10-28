@@ -11,6 +11,8 @@ interface ContainerRequestProps {
 }
 
 const ContainerItem: React.FC<ContainerRowProps> = ({ container }) => {
+    const API_URL = import.meta.env.VITE_API_URL;
+
     const statusColor: Record<string, string> = {
         running: "bg-green-500 animate-pulse shadow-[0_0_8px_1px_rgba(34,197,94,0.6)]",
         exited: "bg-red-500 shadow-[0_0_8px_1px_rgba(239,68,68,0.6)]",
@@ -21,7 +23,7 @@ const ContainerItem: React.FC<ContainerRowProps> = ({ container }) => {
     const colorClass = statusColor[container.State] || "bg-gray-400";
 
     const startContainer = async (props: ContainerRequestProps) => {
-        const url = `http://localhost:4000/api/containers/${props.containerId}/start`
+        const url = `${API_URL}/api/containers/${props.containerId}/start`
         const response = await fetch(url, {
             method: 'POST',
             headers: {
@@ -35,7 +37,7 @@ const ContainerItem: React.FC<ContainerRowProps> = ({ container }) => {
     }
 
     const stopContainer = async (props: ContainerRequestProps) => {
-        const url = `http://localhost:4000/api/containers/${props.containerId}/stop`
+        const url = `${API_URL}/api/containers/${props.containerId}/stop`
         const response = await fetch(url, {
             method: 'POST',
             headers: {
@@ -73,7 +75,7 @@ const ContainerItem: React.FC<ContainerRowProps> = ({ container }) => {
                         <ContextMenu.Item onClick={() => stopContainer({ containerId: container.Id })} className="px-3 py-2 hover:bg-gray-100/25 cursor-pointer">
                             <div>Stop Container</div>
                         </ContextMenu.Item>
-                        
+
                     </ContextMenu.Content>
                 </ContextMenu.Portal>
             </ContextMenu.Root>
