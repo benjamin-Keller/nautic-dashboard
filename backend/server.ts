@@ -40,25 +40,20 @@ async function startServer() {
       try {
         const { imageName } = req.params;
 
-        // 1️⃣ Check if it already exists in DB
         const existing = await ContainerLogo.findOne({ where: { imageName } });
         if (existing) return res.json(existing);
 
-        // 2️⃣ Build GitHub URL
         const logo = imageName.split("/")[1] ?? imageName.split("/")[0];
         const githubUrl = `https://raw.githubusercontent.com/selfhst/icons/refs/heads/main/svg/${logo}.svg`;
 
-        // 3️⃣ Check if the GitHub file actually exists
         let finalLogoUrl = githubUrl;
         try {
           const response = await axios.head(githubUrl);
           if (response.status !== 200) throw new Error("File not found");
         } catch {
-          // 🪦 If not found, fallback to default
-          finalLogoUrl = "https://yourcdn.com/default-logo.svg"; // replace with your wave icon URL
+          finalLogoUrl = "https://raw.githubusercontent.com/benjamin-Keller/nautic-dashboard/refs/heads/main/frontend/src/assets/images/default-container.png";
         }
 
-        // 4️⃣ Save in DB for future requests
         const newLogo = await ContainerLogo.create({
           imageName,
           logoUrl: finalLogoUrl,
