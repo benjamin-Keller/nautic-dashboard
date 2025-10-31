@@ -1,6 +1,8 @@
 import { ContextMenu } from "radix-ui";
 import type { Container } from "../../types/Container.type";
 import defaultWave from "../../assets/images/default-container.png";
+import { useEffect, useState } from "react";
+import { VscDebugRestart } from "react-icons/vsc";
 
 interface ContainerRowProps {
     container: Container;
@@ -12,7 +14,8 @@ interface ContainerRequestProps {
 
 const ContainerItem: React.FC<ContainerRowProps> = ({ container }) => {
     const API_URL = import.meta.env.VITE_API_URL;
-
+    const image = container.Image.split(":")[0];
+    const logo = image.split("/")[1] ?? image.split("/")[0];
     const statusColor: Record<string, string> = {
         running: "bg-green-500 animate-pulse shadow-[0_0_8px_1px_rgba(34,197,94,0.6)]",
         exited: "bg-red-500 shadow-[0_0_8px_1px_rgba(239,68,68,0.6)]",
@@ -20,9 +23,34 @@ const ContainerItem: React.FC<ContainerRowProps> = ({ container }) => {
         restarting: "bg-blue-400 animate-pulse shadow-[0_0_8px_1px_rgba(96,165,250,0.6)]",
         created: "bg-gray-400 shadow-[0_0_8px_1px_rgba(156,163,175,0.5)]",
     };
-    const colorClass = statusColor[container.State] || "bg-gray-400";
+    const [containerLogo, setContainerLogo] = useState<string>(defaultWave);
+    const [colorClass, setColorClass] = useState(statusColor[container.State]);
+
+    useEffect(() => {
+        getContainerLogo(logo);
+    }, [logo]);
+
+    const getContainerLogo = async (containerImage: string) => {
+        try {
+            const url = `${API_URL}/api/logos/${containerImage}`;
+            const response = await fetch(url);
+            if (!response.ok) {
+                throw new Error(`Error fetching logo for image: ${containerImage}`);
+            }
+            else {
+                const data = await response.json();
+                console.log("Fetched logo for image:", containerImage, data);
+                console.log("Logo data:", data);
+                setContainerLogo(data.logoUrl);
+            }
+        }
+        catch (error) {
+            return defaultWave;
+        }
+    }
 
     const startContainer = async (props: ContainerRequestProps) => {
+        setColorClass(statusColor['paused']);
         const url = `${API_URL}/api/containers/${props.containerId}/start`
         const response = await fetch(url, {
             method: 'POST',
@@ -34,9 +62,13 @@ const ContainerItem: React.FC<ContainerRowProps> = ({ container }) => {
         if (!response.ok) {
             console.log(`Something went wrong starting container - ${props.containerId}: ${response.status}`);
         }
+        else {
+            setColorClass(statusColor['running']);
+        }
     }
 
     const stopContainer = async (props: ContainerRequestProps) => {
+        setColorClass(statusColor['paused']);
         const url = `${API_URL}/api/containers/${props.containerId}/stop`
         const response = await fetch(url, {
             method: 'POST',
@@ -48,6 +80,25 @@ const ContainerItem: React.FC<ContainerRowProps> = ({ container }) => {
         if (!response.ok) {
             console.log(`Something went wrong starting container - ${props.containerId}: ${response.status}`);
         }
+        setColorClass(statusColor['exited']);
+    }
+
+    const restartContainer = async (props: ContainerRequestProps) => {
+        setColorClass(statusColor['restarting']);
+        const url = `${API_URL}/api/containers/${props.containerId}/restart`
+        const response = await fetch(url, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            }
+        })
+
+        if (!response.ok) {
+            console.log(`Something went wrong restarting container - ${props.containerId}: ${response.status}`);
+        }
+        else {
+            setColorClass(statusColor['running']);
+        }
     }
 
     return (
@@ -57,7 +108,7 @@ const ContainerItem: React.FC<ContainerRowProps> = ({ container }) => {
                     <section className="rounded-sm hover:bg-white/50 hover:cursor-pointer flex flex-col justify-center items-center w-30 h-30 text-black relative bg-white/25">
                         <div className={`absolute top-2 right-2 w-2 h-2 rounded-full ${colorClass}`} title={container.State} />
                         <img className="w-15 text-black"
-                            src={`https://cdn.simpleicons.org/${container.Image.split(":")[0]}`}
+                            src={containerLogo}
                             onError={(e) => {
                                 (e.target as HTMLImageElement).src = defaultWave;
                             }}
@@ -75,7 +126,11 @@ const ContainerItem: React.FC<ContainerRowProps> = ({ container }) => {
                         <ContextMenu.Item onClick={() => stopContainer({ containerId: container.Id })} className="px-3 py-2 hover:bg-gray-100/25 cursor-pointer">
                             <div>Stop Container</div>
                         </ContextMenu.Item>
-
+                        <div className="flex">
+                            <ContextMenu.Item onClick={() => restartContainer({ containerId: container.Id })} className="px-3 py-2 hover:bg-gray-100/25 cursor-pointer">
+                                <VscDebugRestart className="inline-block ml-1" />
+                            </ContextMenu.Item>
+                        </div>
                     </ContextMenu.Content>
                 </ContextMenu.Portal>
             </ContextMenu.Root>

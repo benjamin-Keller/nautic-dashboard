@@ -2,16 +2,19 @@ version: "3.9"
 
 services:
   backend:
+    image: nautic-server:latest
     build:
-      context: .
-      dockerfile: ./backend/Dockerfile
+      context: ./backend
+      dockerfile: Dockerfile
     container_name: nautic-backend
     ports:
       - "4000:4000"
     environment:
       - NODE_ENV=production
+      - DATABASE_URL=/data/database.sqlite
       - DOCKER_SOCKET_PATH=/var/run/docker.sock
     volumes:
+      - backend_data:/data
       - /var/run/docker.sock:/var/run/docker.sock
     networks:
       - nautic-net
@@ -29,7 +32,9 @@ services:
       - VITE_API_URL=http://backend:4000
     networks:
       - nautic-net
-      
+
 networks:
   nautic-net:
     driver: bridge
+volumes:
+  backend_data:
